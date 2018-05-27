@@ -1,10 +1,4 @@
-/*
- *  This sketch sends data via HTTP GET requests to data.sparkfun.com service.
- *
- *  You need to get streamId and privateKey at data.sparkfun.com and paste them
- *  below. Or just customize this script to talk to other HTTP servers.
- *
- */
+//  This sketch sends data via HTTP GET requests to xxx.xxx.xxx.xxx put your own webserver or IP
 #include <Arduino.h>
 #include <ArduinoJson.h>
 #include <ESP8266WiFi.h>
@@ -20,19 +14,21 @@ String filename = "/S/";
 
 #define SS_PIN 4
 #define RST_PIN 5
-#define Buzzer 2
+#define Buzzer 16
+#define Granted 0
  
 MFRC522 rfid(SS_PIN, RST_PIN); // Instance of the class
 MFRC522::MIFARE_Key key; 
 
-const char* ssid     = "MDCC_00997543403590";
-const char* password = "errnoffu";
+const char* ssid     = "XXXX"; // your wifi
+const char* password = "XXXXXXXXX"; // your password
 
-const char* host = "192.168.0.51";
+const char* host = "192.168.1.9"; // server ip
 
 
 void setup() {
   pinMode(Buzzer, OUTPUT);
+  pinMode(Granted, OUTPUT);
   SPI.begin(); // Init SPI bus
   SPIFFS.begin();
   rfid.PCD_Init(); // Init MFRC522
@@ -90,7 +86,7 @@ void loop() {
   USE_SERIAL.print("[HTTP] begin...\n");
         // configure traged server and url
         //http.begin("https://192.168.1.12/test.html", "7a 9c f4 db 40 d3 62 5a 6e 21 bc 5c cc 66 c8 3e a1 45 59 38"); //HTTPS
-        http.begin("http://192.168.0.51/mydata.txt"); //HTTP
+        http.begin("http://192.168.1.9/crud_android/mydata.txt"); //HTTP
         
         USE_SERIAL.print("[HTTP] GET...\n");
         // start connection and send HTTP header
@@ -120,10 +116,10 @@ void loop() {
               const char* data   = root["data"];
               USE_SERIAL.println(cmd);
               USE_SERIAL.println(data);
-              if (strcmp(cmd, "add")  == 0) {
+              if (strcmp(cmd, "Add")  == 0) {
                 
                // filename = "/P/";
-                filename = data;
+                filename = data; // file name in the local database
                 File f = SPIFFS.open(filename, "a+");
                 // Check if we created the file
                 if (f) {
@@ -134,7 +130,7 @@ void loop() {
                      USE_SERIAL.println("could not create file");
                     }
               }
-              else if (strcmp(cmd, "remove")  == 0) {
+              else if (strcmp(cmd, "Remove")  == 0) {
                
                 filename = data;
                 SPIFFS.remove(filename);
@@ -155,8 +151,8 @@ void loop() {
         
    Serial.println(F("\n Scanning PICC's UID:"));
   // We now create a URI for the request
-   String url = "/checkin.php";
-   url += "?ID=";
+   String url = "/crud_android/access.php";
+   url += "?Tag=";
    String tag;
    Serial.print("Requesting URL: ");
   // This will send the request to the server
@@ -176,12 +172,14 @@ void loop() {
     isKnown = 1; // Label it as known
     // We may also want to do something else if we know the UID
     // Open a door lock, turn a servo, etc
+    
     Serial.println("valid Entry, Access granted");
+   
   }
   else{
     Serial.println("Invalid Entry");
     digitalWrite(Buzzer, HIGH);
-    delay(5000);
+    delay(1500);
     digitalWrite(Buzzer, LOW);
     }  
   //client.println(" ");
