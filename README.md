@@ -1,5 +1,5 @@
 # smartiot
-This is a project for distributed home control with Android app enabled by IoT.
+This is a project for distributed home Automation for controlling and monitoring various devices with Android app based on IoT.
 Requirements
 
 Hardware :1. NodeMCU v1.0 also known as ESP8266-12E
